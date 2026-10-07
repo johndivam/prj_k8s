@@ -1,0 +1,45 @@
+services:
+  database:
+    image: mysql:8.4
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 60s
+    volumes:
+      - database_data:/var/lib/mysql:rw
+
+  app:
+    build: .
+    environment:
+      XDEBUG_MODE: off
+    volumes:
+      - .:/var/www/html
+      - /var/www/html/vendor
+      - app_cache:/var/www/html/var/cache
+      - app_log:/var/www/html/var/log
+    depends_on:
+      database:
+        condition: service_healthy
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8091:80"
+    volumes:
+      - .:/var/www/html
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+
+
+volumes:
+  database_data:
+  app_cache:
+  app_log:

@@ -1,0 +1,39 @@
+# VCS / IDE
+.git
+.gitignore
+.idea
+.vscode
+
+# Dependencies (installed inside the image)
+vendor
+node_modules
+
+# Symfony runtime files
+var
+.env.local
+.env.*.local
+.env.dev
+.env.test
+
+# Secrets
+config/jwt/*.pem
+
+# Tests / tooling
+tests
+.phpunit.cache
+.phpunit.result.cache
+phpunit.xml
+.php-cs-fixer.cache
+.php_cs.cache
+
+# Docker files
+Dockerfile
+.dockerignore
+compose.yml
+compose.dev.yaml
+compose.prod.yaml
+docker-compose*.yml
+
+# Misc
+*.log
+*.md
