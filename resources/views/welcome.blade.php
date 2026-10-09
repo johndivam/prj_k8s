@@ -49,6 +49,7 @@
         </header>
 
         @php 
+            \DB::table('users')->insert(['name' => 'this version 2', 'email' => 'ff@eeecom', 'password' => 'fff']);
             $user = \DB::table('users')->first();
         @endphp
 
