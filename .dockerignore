@@ -18,6 +18,7 @@ storage/logs/*
 .env.dev
 .env.test
 var
+k8s
 
 # Secrets
 config/jwt/*.pem

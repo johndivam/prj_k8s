@@ -7,18 +7,18 @@ metadata:
   name: laravel-config
 data:
   APP_NAME: "Laravel"
-  APP_ENV: "production"
-  APP_DEBUG: "false"
+  APP_ENV: "local"
+  APP_DEBUG: "true"
   APP_URL: "http://localhost"
   LOG_CHANNEL: "stderr"
   LOG_LEVEL: "info"
   SESSION_DRIVER: "cookie"
   CACHE_STORE: "file"
   QUEUE_CONNECTION: "sync"
-  # DB_CONNECTION: "mysql"
-  # DB_HOST: "mysql.laravel-app.svc"
-  # DB_PORT: "3306"
-  # DB_DATABASE: "laravel"
+  DB_CONNECTION: "mysql"
+  DB_HOST: "mysql.laravel-app.svc"
+  DB_PORT: "3306"
+  DB_DATABASE: "laravel2"
 ---
 apiVersion: v1
 kind: Secret
@@ -27,9 +27,9 @@ metadata:
 type: Opaque
 stringData:
   # php artisan key:generate --show
-  APP_KEY: "base64:REPLACE_ME"
-  # DB_USERNAME: "laravel"
-  # DB_PASSWORD: "change-me"
+  APP_KEY: "base64:WyzE1vOj64OhNPdwkQTYAmTjTlveBmPgNOwgJdP8eQo="
+  DB_USERNAME: "root"
+  DB_PASSWORD: "root"
 ---
 apiVersion: v1
 kind: ConfigMap
