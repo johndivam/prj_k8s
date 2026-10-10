@@ -65,7 +65,7 @@ metadata:
   labels:
     app: laravel
 spec:
-  replicas: 2
+  replicas: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -86,15 +86,16 @@ spec:
       # copy public/ (css, js, images) so nginx can serve static files
       initContainers:
         - name: copy-public
-          image: mohamedzh/prj_k8s-img:v1.0
+          image: mohamedzh/prj_k8s-img:v1.1
+          imagePullPolicy: Always
           command: ["sh", "-c", "cp -a /var/www/html/public/. /shared-public/"]
           volumeMounts:
             - name: public
               mountPath: /shared-public
       containers:
         - name: php
-          image: mohamedzh/prj_k8s-img:v1.0
-          imagePullPolicy: IfNotPresent
+          image: mohamedzh/prj_k8s-img:v1.1
+          imagePullPolicy: Always
           ports:
             - containerPort: 9000
               name: fpm
