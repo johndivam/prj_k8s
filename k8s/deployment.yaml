@@ -1,8 +1,67 @@
+# Everything in one file:  kubectl apply -f k8s/deployment.yaml
+# Before applying: set the image (appears twice) and APP_KEY, host in Ingress.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: laravel-config
+data:
+  APP_NAME: "Laravel"
+  APP_ENV: "production"
+  APP_DEBUG: "false"
+  APP_URL: "http://localhost"
+  LOG_CHANNEL: "stderr"
+  LOG_LEVEL: "info"
+  SESSION_DRIVER: "cookie"
+  CACHE_STORE: "file"
+  QUEUE_CONNECTION: "sync"
+  # DB_CONNECTION: "mysql"
+  # DB_HOST: "mysql.laravel-app.svc"
+  # DB_PORT: "3306"
+  # DB_DATABASE: "laravel"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: laravel-secret
+type: Opaque
+stringData:
+  # php artisan key:generate --show
+  APP_KEY: "base64:REPLACE_ME"
+  # DB_USERNAME: "laravel"
+  # DB_PASSWORD: "change-me"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  default.conf: |
+    server {
+        listen 80;
+        index index.php;
+        root /var/www/html/public;
+
+        location / {
+            try_files $uri $uri/ /index.php?$query_string;
+        }
+
+        location ~ \.php$ {
+            fastcgi_pass app:9000;
+            fastcgi_index index.php;
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        }
+
+        location ~ /\.(?!well-known).* {
+            deny all;
+        }
+    }
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: laravel
-  namespace: laravel-app
   labels:
     app: laravel
 spec:
@@ -20,7 +79,11 @@ spec:
       labels:
         app: laravel
     spec:
-      # Copy public/ (css, js, images) from the app image so nginx can serve static files
+      # makes "app:9000" in nginx.conf resolve to the php container in this pod
+      hostAliases:
+        - ip: "127.0.0.1"
+          hostnames: ["app"]
+      # copy public/ (css, js, images) so nginx can serve static files
       initContainers:
         - name: copy-public
           image: mohamedzh/prj_k8s-img:v1.0
@@ -89,3 +152,40 @@ spec:
         - name: nginx-conf
           configMap:
             name: nginx-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: laravel
+spec:
+  type: ClusterIP
+  selector:
+    app: laravel
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: laravel
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "25m"
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  # tls:
+  #   - hosts: [app.example.com]
+  #     secretName: laravel-tls
+  rules:
+    - host: app.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: laravel
+                port:
+                  name: http
