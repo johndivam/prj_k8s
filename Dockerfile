@@ -10,6 +10,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends libzip-dev \
 WORKDIR /var/www/html
 COPY --from=vendor /app/vendor ./vendor
 COPY . .
+RUN rm -f bootstrap/cache/*.php \
+       && php artisan package:discover --ansi
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["entrypoint.sh"]
