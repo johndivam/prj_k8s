@@ -65,7 +65,7 @@ metadata:
   labels:
     app: laravel
 spec:
-  replicas: 1
+  replicas: 2
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -87,7 +87,7 @@ spec:
       initContainers:
         - name: copy-public
           image: mohamedzh/prj_k8s-img:v1.1
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           command: ["sh", "-c", "cp -a /var/www/html/public/. /shared-public/"]
           volumeMounts:
             - name: public
@@ -95,7 +95,7 @@ spec:
       containers:
         - name: php
           image: mohamedzh/prj_k8s-img:v1.1
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 9000
               name: fpm
