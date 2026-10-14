@@ -17,7 +17,7 @@ spec:
       containers:
       - name: laravel-app
         image: ghcr.io/johndivam/prj_k8s:latest
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         envFrom:
             - configMapRef:
                 name: laravel-config
