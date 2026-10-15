@@ -14,23 +14,78 @@ spec:
       labels:
         app: laravel-app
     spec:
+      initContainers:
+      - name: copy-public
+        image: ghcr.io/johndivam/prj_k8s:latest
+        command: ["sh", "-c", "cp -R /var/www/html/public/. /shared"]
+        volumeMounts:
+        - name: public
+          mountPath: /shared
       containers:
       - name: laravel-app
         image: ghcr.io/johndivam/prj_k8s:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         envFrom:
             - configMapRef:
                 name: laravel-config
             - secretRef:
                 name: laravel-secret
+        livenessProbe:
+          tcpSocket:
+            port: 9000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          tcpSocket:
+            port: 9000
+          periodSeconds: 5
+        resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 384Mi
       - name: nginx
         image: nginx:1.27-alpine
         ports:
-        - containerPort: 80 
+        - containerPort: 80
+        startupProbe:
+          httpGet:
+            path: /up
+            port: 80
+          periodSeconds: 3
+          failureThreshold: 20
+        livenessProbe:
+          httpGet:
+            path: /up
+            port: 80
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 80
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        resources:
+            requests:
+              cpu: 50m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 64Mi
         volumeMounts:
         - name: nginx-conf
           mountPath: /etc/nginx/conf.d
+        - name: public
+          mountPath: /var/www/html/public
       volumes:
       - name: nginx-conf
         configMap:
           name: nginx-conf
+      - name: public
+        emptyDir: {}
