@@ -61,7 +61,8 @@
                     <h1 class="mb-1 font-medium">Let's get started: {{ $user->name }}</h1>
                     <p class="mb-2 text-[#706f6c] dark:text-[#A1A09A]">With so many options available to you,<br /> we suggest you start with the following:</p>
                     <img src="{{ asset('images/logo.jpg') }}" class="mx-full">
-                     <livewire:cv-form />
+                    <br>
+                    <livewire:cv-form />
                         <hr><br>  
                     <livewire:candidate-list />
                 </div>
